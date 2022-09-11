@@ -23,3 +23,8 @@ runs via nodemon, which watches the src/\*\* folder for any changes, restarting 
 
 npm run debug  
 also starts the node inspector on port 9229, so that a debugger can be attached (e.g., VSCode)
+
+### curl
+
+curl -s localhost:8080 | jq  
+done in another terminal
