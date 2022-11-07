@@ -7,8 +7,8 @@ LABEL maintainer="Gulnur Baimukhambetova <gbaimukhambetova@myseneca.ca>"
 LABEL description="Fragments node.js microservice"
 
 #Install dumb-init 
-RUN apk update && apk upgrade 
-RUN apk add --no-cache dumb-init=1.2.5-r1
+RUN apk update && apk upgrade &&\
+    apk add --no-cache dumb-init=1.2.5-r1
 
 # Use /app as our working directory
 WORKDIR /app
