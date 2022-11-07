@@ -1,13 +1,14 @@
 # Dokerfile for the fragments microservice 
 
 # Stage 0: install the base dependencies
-FROM node:16.14-alpine@sha256:2c6c59cf4d34d4f937ddfcf33bab9d8bbad8658d1b9de7b97622566a52167f2b AS dependencies
+FROM node:16-alpine3.16@sha256:f16544bc93cf1a36d213c8e2efecf682e9f4df28429a629a37aaf38ecfc25cf4 AS dependencies
 
 LABEL maintainer="Gulnur Baimukhambetova <gbaimukhambetova@myseneca.ca>"
 LABEL description="Fragments node.js microservice"
 
-#Install dumb-init curl
-RUN apk --no-cache add dumb-init=1.2.5-r2
+#Install dumb-init 
+RUN apk update && apk upgrade 
+RUN apk add --no-cache dumb-init=1.2.5-r1
 
 # Use /app as our working directory
 WORKDIR /app
@@ -22,7 +23,7 @@ RUN npm ci --only=production
 #######################################################################
 
 # Stage 1: build the site using dependencies 
-FROM node:16.14-alpine@sha256:2c6c59cf4d34d4f937ddfcf33bab9d8bbad8658d1b9de7b97622566a52167f2b AS production
+FROM node:16-alpine3.16@sha256:f16544bc93cf1a36d213c8e2efecf682e9f4df28429a629a37aaf38ecfc25cf4 AS production
 
 # Optimize for production
 ENV NODE_ENV=production
@@ -35,7 +36,7 @@ ENV NPM_CONFIG_LOGLEVEL=warn
 # https://docs.npmjs.com/cli/v8/using-npm/config#color
 ENV NPM_CONFIG_COLOR=false
 
-# Copy the init process  and curl from the previous stage 
+# Copy the init process from the previous stage 
 COPY --from=dependencies /usr/bin/dumb-init /usr/bin/dumb-init
 
 # Run with least possible privilege
@@ -60,5 +61,5 @@ CMD ["node", "src/server.js"]
 EXPOSE 8080
 
 # Set healthcheck for the server
-HEALTHCHECK  --interval=15s --timeout=30s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=15s --timeout=30s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080 || exit 1
