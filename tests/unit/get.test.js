@@ -4,6 +4,8 @@ const request = require('supertest');
 
 const app = require('../../src/app');
 
+const hash = require('../../src/hash');
+
 describe('GET /v1/fragments', () => {
   // If the request is missing the Authorization header, it should be forbidden
   test('unauthenticated requests are denied', () => request(app).get('/v1/fragments').expect(401));
@@ -18,5 +20,35 @@ describe('GET /v1/fragments', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.status).toBe('ok');
     expect(Array.isArray(res.body.fragments)).toBe(true);
+  });
+
+  // Using a valid username/password pair should give a success result with a .fragments array
+  test('authenticated users get a fragments array', async () => {
+    const res = await request(app).get('/v1/fragments').auth('user1@email.com', 'password1');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.status).toBe('ok');
+    expect(Array.isArray(res.body.fragments)).toBe(true);
+  });
+
+  // Using expand and a valid username/password pair should give a success result
+  // with a .fragments array with each fragment details
+  test('expand gets fragments data with details', async () => {
+    await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('content-type', 'text/plain')
+      .send('example value');
+    const res = await request(app)
+      .get('/v1/fragments?expand=1')
+      .auth('user1@email.com', 'password1');
+
+    const hashedEmail = hash('user1@email.com');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.status).toBe('ok');
+    expect(res.body.fragments[0].id).toMatch(/[A-Za-z0-9_-]+/);
+    expect(res.body.fragments[0].type).toBe('text/plain');
+    expect(res.body.fragments[0].size).toBe(Buffer.byteLength('example value'));
+    expect(res.body.fragments[0].ownerId).toBe(hashedEmail);
+    expect(res.body.fragments[0].created).not.toBeNull();
   });
 });
