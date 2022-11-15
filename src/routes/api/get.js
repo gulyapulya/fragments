@@ -13,6 +13,6 @@ module.exports = async (req, res) => {
     const fragments = await Fragment.byUser(req.user, expand);
     res.status(200).json(response.createSuccessResponse({ fragments }));
   } catch (err) {
-    res.status(401).json(response.createErrorResponse(401, err));
+    res.status(404).json(response.createErrorResponse(404, err));
   }
 };

@@ -37,7 +37,7 @@ describe('GET /v1/fragments', () => {
       .post('/v1/fragments')
       .auth('user1@email.com', 'password1')
       .set('content-type', 'text/plain')
-      .send('example value');
+      .send('fragment');
     const res = await request(app)
       .get('/v1/fragments?expand=1')
       .auth('user1@email.com', 'password1');
@@ -47,7 +47,7 @@ describe('GET /v1/fragments', () => {
     expect(res.body.status).toBe('ok');
     expect(res.body.fragments[0].id).toMatch(/[A-Za-z0-9_-]+/);
     expect(res.body.fragments[0].type).toBe('text/plain');
-    expect(res.body.fragments[0].size).toBe(Buffer.byteLength('example value'));
+    expect(res.body.fragments[0].size).toBe(Buffer.byteLength('fragment'));
     expect(res.body.fragments[0].ownerId).toBe(hashedEmail);
     expect(res.body.fragments[0].created).not.toBeNull();
   });
