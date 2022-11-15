@@ -23,6 +23,21 @@ describe('GET /v1/fragments/:id', () => {
     expect(res.statusCode).toBe(415);
   });
 
+  // Using a valid username/password pair, valid id, and extension, return converted data
+  test('requested conversion invalid', async () => {
+    const user = hash('user1@email.com');
+    const data = Buffer.from('# fragment');
+    const fragment = new Fragment({ ownerId: user, type: 'text/markdown' });
+    await fragment.setData(data);
+    await fragment.save();
+    const res = await request(app)
+      .get(`/v1/fragments/${fragment.id}.html`)
+      .auth('user1@email.com', 'password1');
+    expect(res.statusCode).toBe(200);
+    expect(res.headers['content-type']).toEqual('text/html; charset=utf-8');
+    expect(res.text).toBe('<h1>fragment</h1>\n');
+  });
+
   // Using a valid username/password pair with valid id, return fragment
   test('requested valid fragment', async () => {
     const user = hash('user1@email.com');
