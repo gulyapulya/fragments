@@ -30,11 +30,11 @@ describe('POST /v1/fragments', () => {
 
   // If the wrong content-type or data used, it should return 415
   test('incorrect types are denied', async () => {
-    const data = 'unsupported';
+    const data = Buffer.from('This is fragment');
     const res = await request(app)
       .post('/v1/fragments')
       .auth('user1@email.com', 'password1')
-      .set('Content-Type', 'application/json')
+      .set('Content-Type', 'audio/mpeg')
       .send(data);
     expect(res.statusCode).toBe(415);
   });

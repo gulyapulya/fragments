@@ -2,7 +2,8 @@ const { createSuccessResponse, createErrorResponse } = require('../../response')
 const { Fragment } = require('../../model/fragment');
 
 module.exports = async (req, res) => {
-  if (!Buffer.isBuffer(req.body)) {
+  if (!Buffer.isBuffer(req.body) || !Fragment.isSupportedType(req.get('Content-Type'))) {
+    console.log('WORKS!!!!');
     return res.status(415).json(createErrorResponse(415, 'This type is not supported'));
   }
 

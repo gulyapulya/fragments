@@ -3,6 +3,10 @@
 const { randomUUID } = require('crypto');
 // Use https://www.npmjs.com/package/content-type to create/parse Content-Type headers
 const contentType = require('content-type');
+// Use https://www.npmjs.com/package/mime-types to convert extension to associated Content-Type
+const mime = require('mime-types');
+// Use https://github.com/markdown-it/markdown-it to convert markdown to html
+const md = require('markdown-it')();
 
 // Functions for working with fragment metadata/data using our DB
 const {
@@ -14,7 +18,13 @@ const {
   deleteFragment,
 } = require('./data');
 
-const supportedTypes = ['text/plain', 'text/plain; charset=utf-8'];
+const supportedTypes = [
+  'text/plain',
+  'text/plain; charset=utf-8',
+  `text/markdown`,
+  `text/html`,
+  `application/json`,
+];
 
 class Fragment {
   constructor({ id, ownerId, created = new Date(), updated = new Date(), type, size = 0 }) {
@@ -124,7 +134,24 @@ class Fragment {
    * @returns {Array<string>} list of supported mime types
    */
   get formats() {
-    return [this.mimeType];
+    let convertableTo;
+    if (this.type.includes('text/plain')) {
+      convertableTo = ['text/plain'];
+    } else if (this.type.includes('text/markdown')) {
+      convertableTo = ['text/markdown', 'text/html', 'text/plain'];
+    } else if (this.type.includes('text/html')) {
+      convertableTo = ['text/html', 'text/plain'];
+    } else if (this.type.includes('application/json')) {
+      convertableTo = ['application/json', 'text/plain'];
+    } else if (
+      this.type === 'image/png' ||
+      this.type === 'image/jpeg' ||
+      this.type === 'image/webp' ||
+      this.type === 'image/gif'
+    ) {
+      convertableTo = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+    }
+    return convertableTo;
   }
 
   /**
@@ -134,6 +161,29 @@ class Fragment {
    */
   static isSupportedType(value) {
     return supportedTypes.includes(value);
+  }
+
+  /**
+   * Returns converted data as well new type based on extension
+   * @param {Buffer} data data to convert
+   * @param {string} extension extension to covert to
+   * @returns {Buffer, string} new converted data and new type
+   */
+  async convertTo(data, ext) {
+    let newType = mime.lookup(ext);
+    const convertableTypes = this.formats;
+    if (!convertableTypes.includes(newType)) {
+      return false;
+    }
+
+    let newData = data;
+    if (this.mimeType != newType) {
+      if (this.mimeType == 'text/markdown' && newType == 'text/html') {
+        newData = md.render(data.toString());
+        newData = Buffer.from(newData);
+      }
+    }
+    return { newData, newType };
   }
 }
 
