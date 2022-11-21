@@ -7,9 +7,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const api_url = process.env.API_URL
-      ? process.env.API_URL
-      : `http://localhost:${process.env.PORT}`;
+    const api_url = process.env.API_URL ? process.env.API_URL : `http://localhost:8080`;
     const fragment = new Fragment({ ownerId: req.user, type: req.get('Content-Type') });
     await fragment.save();
     await fragment.setData(req.body);
