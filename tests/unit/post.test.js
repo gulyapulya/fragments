@@ -61,9 +61,7 @@ describe('POST /v1/fragments', () => {
       .send(data);
     expect(res.statusCode).toBe(201);
     expect(res.body.status).toBe('ok');
-    expect(res.headers.location).toEqual(
-      `${process.env.API_URL}/v1/fragments/${JSON.parse(res.text).fragment.id}`
-    );
+    expect(res.headers.location).toMatch(`/v1/fragments/${JSON.parse(res.text).fragment.id}`);
   });
 
   // Using a valid username/password pair should give a success result with proper id
