@@ -87,11 +87,11 @@ jobs:
           # Use the image we just built and pushed to ECR for this tag
           image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO }}:${{ env.VERSION_TAG }}
           environment-variables: |
-            LOG_LEVEL=silent
+            LOG_LEVEL=info
             NODE_ENV=production
             AWS_COGNITO_POOL_ID=${{ secrets.AWS_COGNITO_POOL_ID }}
             AWS_COGNITO_CLIENT_ID=${{ secrets.AWS_COGNITO_CLIENT_ID }}
-            API_URL=http://ec2co-ecsel-t07606mli7xv-1470306339.us-east-1.elb.amazonaws.com:8080/
+            API_URL=http://ec2co-ecsel-t07606mli7xv-1470306339.us-east-1.elb.amazonaws.com:8080
             AWS_S3_BUCKET_NAME=gbaimukhambetova-fragments
 
       - name: Deploy Amazon ECS task definition
