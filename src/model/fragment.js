@@ -27,7 +27,7 @@ const supportedTypes = [
 ];
 
 class Fragment {
-  constructor({ id, ownerId, created = new Date(), updated = new Date(), type, size = 0 }) {
+  constructor({ id, ownerId, created, updated, type, size = 0 }) {
     if (!ownerId || !type) {
       throw new Error(`ownerId and type are required`);
     }
@@ -40,8 +40,8 @@ class Fragment {
 
     this.id = id || randomUUID();
     this.ownerId = ownerId;
-    this.created = created.toISOString();
-    this.updated = updated.toISOString();
+    this.created = created || new Date().toISOString();
+    this.updated = updated || new Date().toISOString();
     this.type = type;
     this.size = size;
   }
@@ -53,7 +53,15 @@ class Fragment {
    * @returns Promise<Array<Fragment>>
    */
   static async byUser(ownerId, expand = false) {
-    return listFragments(ownerId, expand);
+    try {
+      const fragments = await listFragments(ownerId, expand);
+      if (expand) {
+        return fragments.map((fragment) => new Fragment(fragment));
+      }
+      return fragments;
+    } catch (err) {
+      throw new Error('Error listing fragments');
+    }
   }
 
   /**
@@ -63,11 +71,13 @@ class Fragment {
    * @returns Promise<Fragment>
    */
   static async byId(ownerId, id) {
-    const fragment = await readFragment(ownerId, id);
-    if (!fragment) {
-      throw new Error('Fragment must be valid');
+    try {
+      const data = await readFragment(ownerId, id);
+      const fragment = new Fragment(data);
+      return fragment;
+    } catch (err) {
+      throw new Error('Error extracting fragment');
     }
-    return fragment;
   }
 
   /**
@@ -77,7 +87,11 @@ class Fragment {
    * @returns Promise
    */
   static delete(ownerId, id) {
-    return deleteFragment(ownerId, id);
+    try {
+      return deleteFragment(ownerId, id);
+    } catch (err) {
+      throw new Error('Unable to delete fragment');
+    }
   }
 
   /**
