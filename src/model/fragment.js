@@ -7,6 +7,8 @@ const contentType = require('content-type');
 const mime = require('mime-types');
 // Use https://github.com/markdown-it/markdown-it to convert markdown to html
 const md = require('markdown-it')();
+// Use https://www.npmjs.com/package/sharp to convert images
+const sharp = require('sharp');
 
 // Functions for working with fragment metadata/data using our DB
 const {
@@ -24,6 +26,10 @@ const supportedTypes = [
   `text/markdown`,
   `text/html`,
   `application/json`,
+  `image/png`,
+  `image/jpeg`,
+  `image/webp`,
+  `image/gif`,
 ];
 
 class Fragment {
@@ -195,6 +201,15 @@ class Fragment {
       if (this.mimeType == 'text/markdown' && newType == 'text/html') {
         newData = md.render(data.toString());
         newData = Buffer.from(newData);
+      }
+      if (
+        this.mimeType.startsWith('image') &&
+        (newType == 'image/png' ||
+          newType == 'image/jpeg' ||
+          newType == 'image/webp' ||
+          newType == 'image/gif')
+      ) {
+        newData = sharp(data).toFormat(newType.slice(6)).toBuffer();
       }
     }
     return { newData, newType };
