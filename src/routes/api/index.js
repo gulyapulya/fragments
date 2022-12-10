@@ -38,6 +38,10 @@ router.get('/fragments/:id/info', require('./getByIdInfo'));
 // /v1/fragments
 router.post('/fragments', rawBody(), require('./post'));
 
+//PUT
+// /v1/fragments/:id
+router.put('/fragments/:id', rawBody(), require('./put'));
+
 // DELETE routes
 // /v1/fragments/:id
 router.delete('/fragments/:id', require('./delete'));
