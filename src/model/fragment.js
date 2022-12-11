@@ -209,7 +209,7 @@ class Fragment {
           newType == 'image/webp' ||
           newType == 'image/gif')
       ) {
-        newData = sharp(data).toFormat(newType.slice(6)).toBuffer();
+        newData = await sharp(data).toFormat(newType.slice(6)).toBuffer();
       }
     }
     return { newData, newType };
